@@ -2,8 +2,7 @@ import asyncio
 import json
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
-from shared.models.vehicle import VehicleTelemetry
-from shared.models.enrichment import ProcessedVehicleData, RiskLevel
+from shared import VehicleTelemetry, ProcessedVehicleData, RiskLevel
 
 from app.weather import get_external_temperature, is_heatwave
 from app.traffic import get_traffic_level
