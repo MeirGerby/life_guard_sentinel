@@ -16,13 +16,4 @@ class VehicleTelemetry(BaseModel):
     location: GPSLocation
 
 
-# telemetry = VehicleTelemetry(
-#     vehicle_id="CAR_101",
-#     internal_temp=34.2,
-#     engine_status="off",
-#     occupancy_detected=True,
-#     parent_distance_meters=200.5,
-#     location=GPSLocation(lat=32.08, lon=34.78)
-# )
 
-# print(telemetry.model_dump_json())
