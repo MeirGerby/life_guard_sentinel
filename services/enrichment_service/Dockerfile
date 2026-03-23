@@ -9,4 +9,4 @@ ENV PYTHONPATH=/app
 
 RUN pip install pydantic
 
-CMD ["python", "app/main.py"]
+CMD ["python", "main.py"]

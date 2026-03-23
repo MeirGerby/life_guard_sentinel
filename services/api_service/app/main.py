@@ -1,14 +1,21 @@
 from fastapi import FastAPI
-from shared.redis.client import RedisClient
 
-app = FastAPI()
-redis_client = RedisClient()
+from app.routes import vehicles, alerts
 
 
-@app.get("/vehicles/{vehicle_id}")
-def get_vehicle(vehicle_id: int):
-    data = redis_client.get(f"vehicle:{vehicle_id}")
-    return {"vehicle": data}
+app = FastAPI(
+    title="Life Guard Sentinel API",
+    version="1.0.0"
+)
+
+# Register routes
+app.include_router(vehicles.router, prefix="/vehicles", tags=["Vehicles"])
+app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
+
+
+@app.get("/")
+def root():
+    return {"message": "API is running"}
 
 
 @app.get("/health")
