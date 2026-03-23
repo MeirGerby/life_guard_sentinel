@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -13,8 +13,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "life-guard-sentinel"
     LOG_LEVEL: str = "INFO"
 
-    class Config:
-        env_file = ".env"
-
+    model_config = SettingsConfigDict(
+        env_file = ".env",
+        extra='ignore'
+    )
 
 settings = Settings()

@@ -10,11 +10,18 @@ class RedisClient:
             decode_responses=True
         )
 
-    def set(self, key: str, value: str):
-        self.client.set(key, value)
+    async def set(self, key: str, value: str):
+        """Asynchronously set a value in Redis."""
+        await self.client.set(key, value)
 
-    def get(self, key: str):
-        return self.client.get(key)
+    async def get(self, key: str):
+        """Asynchronously get a value from Redis."""
+        return await self.client.get(key)
 
-    def delete(self, key: str):
-        self.client.delete(key)
+    async def delete(self, key: str):
+        """Asynchronously delete a key."""
+        await self.client.delete(key)
+
+    async def close(self):
+        """Close the connection pull"""
+        await self.client.aclose()

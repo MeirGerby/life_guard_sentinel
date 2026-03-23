@@ -1,5 +1,6 @@
-from kafka import KafkaProducer
+import asyncio 
 import json
+from aiokafka import AIOKafkaProducer 
 from shared.config.settings import settings
 from shared.utils.logger import get_logger
 
@@ -8,17 +9,27 @@ logger = get_logger(__name__)
 
 class Producer:
     def __init__(self):
-        self.producer = KafkaProducer(
+        self.producer = AIOKafkaProducer(
             bootstrap_servers=settings.KAFKA_BROKER,
             value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-            retries=5
+            retry_backoff_ms=100,
+            request_timeout_ms=40000
         )
 
-    def send(self, topic: str, data: dict):
-        try:
-            future = self.producer.send(topic, data)
-            result = future.get(timeout=10)
+    async def start(self):
+        """Must be called before sending messages"""
+        return await self.producer.start()
+
+    async def stop(self):
+        """Clearly shut down the producer"""
+        return await self.producer.stop()
+
+    async def send(self, topic: str, data: dict):
+        try:  
+            result = await self.producer.send_and_wait(topic, data)
             logger.info(f"Message sent to {topic}: {data}")
             return result
+        
         except Exception as e:
             logger.error(f"Failed to send message: {e}")
+            raise
