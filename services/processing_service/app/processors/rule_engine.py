@@ -1,11 +1,10 @@
-def evaluate_risk(vehicle: dict):
-    temp = vehicle.get("temperature", 0)
-    distance = vehicle.get("parent_distance", 0)
+def rule_risk(features: dict) -> int:
+    score = 0
 
-    if temp > 40 and distance > 10:
-        return "HIGH"
+    if features["is_child_alone"]:
+        score += 30
 
-    if temp > 35:
-        return "MEDIUM"
+    if features["engine_off"]:
+        score += 20
 
-    return None
+    return score

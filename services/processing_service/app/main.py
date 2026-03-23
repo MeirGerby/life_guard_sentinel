@@ -1,37 +1,72 @@
-from shared.kafka.consumer import Consumer
-from shared.kafka.producer import Producer
-from shared.kafka.topics import Topics
-from shared.redis.client import RedisClient
-from shared.utils.logger import get_logger
+import asyncio
+import json
+import aioredis
+from aiokafka import AIOKafkaProducer
 
-from app.processors.rule_engine import evaluate_risk
+from shared.models.alert import AlertEvent, AlertAction
 
-logger = get_logger(__name__)
-
-consumer = Consumer(Topics.VEHICLE_DATA, group_id="processing-group")
-producer = Producer()
-redis_client = RedisClient()
+from app.consumer import create_consumer
+from app.pipelines.risk_pipeline import run_pipeline
+from app.state.vehicle_state import VehicleState
 
 
-def run():
-    for event in consumer.listen():
-        logger.info(f"Processing: {event}")
+KAFKA_BROKER = "kafka:9092"
+OUTPUT_TOPIC = "alerts"
 
-        risk = evaluate_risk(event)
 
-        # Save state in Redis
-        redis_client.set(f"vehicle:{event['vehicle_id']}", str(event))
+async def main():
+    consumer = await create_consumer()
 
-        if risk:
-            alert = {
-                "vehicle_id": event["vehicle_id"],
-                "risk_level": risk,
-                "message": "Danger detected!"
-            }
+    producer = AIOKafkaProducer(
+        bootstrap_servers=KAFKA_BROKER,
+        value_serializer=lambda v: json.dumps(v).encode("utf-8")
+    )
 
-            producer.send(Topics.ALERTS, alert)
-            logger.warning(f"ALERT: {alert}")
+    redis = await aioredis.from_url(
+        "redis://redis:6379",
+        encoding="utf-8",
+        decode_responses=True
+    )
+
+    state = VehicleState(redis)
+
+    await producer.start()
+
+    try:
+        async for msg in consumer:
+            raw = json.loads(msg.value)
+
+            # 🧠 process
+            processed = run_pipeline(raw)
+
+            # 💾 update state
+            await state.update(processed.vehicle_id, processed.dict())
+
+            # 🚨 create alert if needed
+            if processed.risk_level in ["HIGH", "CRITICAL"]:
+                alert = AlertEvent(
+                    vehicle_id=processed.vehicle_id,
+                    priority=processed.risk_level,
+                    message=processed.recommendation,
+                    actions=[
+                        AlertAction.SMS,
+                        AlertAction.PUSH,
+                        AlertAction.CALL
+                    ],
+                    recipient_phone=processed.owner_phone,
+                    recipient_name=processed.owner_name
+                )
+
+                await producer.send_and_wait(
+                    OUTPUT_TOPIC,
+                    alert.dict()
+                )
+
+    finally:
+        await consumer.stop()
+        await producer.stop()
+        await redis.close()
 
 
 if __name__ == "__main__":
-    run()
+    asyncio.run(main())
