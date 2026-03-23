@@ -1,6 +1,6 @@
 import asyncio
 import json
-import aioredis
+import redis.asyncio
 from aiokafka import AIOKafkaProducer
 
 from shared.models.alert import AlertEvent, AlertAction
@@ -36,13 +36,13 @@ async def main():
         async for msg in consumer:
             raw = json.loads(msg.value)
 
-            # 🧠 process
+            
             processed = run_pipeline(raw)
 
-            # 💾 update state
+            
             await state.update(processed.vehicle_id, processed.dict())
 
-            # 🚨 create alert if needed
+
             if processed.risk_level in ["HIGH", "CRITICAL"]:
                 alert = AlertEvent(
                     vehicle_id=processed.vehicle_id,
