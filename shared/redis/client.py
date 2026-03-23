@@ -1,10 +1,10 @@
-import redis
+from redis.asyncio import Redis 
 from shared.config.settings import settings
 
 
 class RedisClient:
     def __init__(self):
-        self.client = redis.Redis(
+        self.client = Redis(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
             decode_responses=True
