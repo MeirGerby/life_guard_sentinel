@@ -1,8 +1,7 @@
 import asyncio
 import json
-from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
-from shared import VehicleTelemetry, ProcessedVehicleData, RiskLevel
+from shared import VehicleTelemetry, ProcessedVehicleData, RiskLevel, Consumer, Producer
 
 from app.weather import get_external_temperature, is_heatwave
 from app.traffic import get_traffic_level
@@ -97,7 +96,7 @@ async def main():
                 recommendation=recommendation
             )
 
-            # 📤 send forward
+            
             await producer.send_and_wait(
                 OUTPUT_TOPIC,
                 processed.dict()
