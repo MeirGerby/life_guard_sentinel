@@ -1,9 +1,9 @@
 import json
-import aioredis
+from shared import RedisClient
 
 
 class VehicleState:
-    def __init__(self, redis):
+    def __init__(self, redis: RedisClient):
         self.redis = redis
 
     async def update(self, vehicle_id: str, data: dict):

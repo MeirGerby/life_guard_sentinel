@@ -1,46 +1,38 @@
 import asyncio
-import json
-import redis.asyncio
-from aiokafka import AIOKafkaProducer
-
-from shared.models.alert import AlertEvent, AlertAction
-
-from app.consumer import create_consumer
+    
 from app.pipelines.risk_pipeline import run_pipeline
 from app.state.vehicle_state import VehicleState
+from shared import (
+    Consumer, 
+    RedisClient, 
+    Producer, 
+    Topics, 
+    AlertEvent, 
+    AlertAction
+)
 
 
 KAFKA_BROKER = "kafka:9092"
-OUTPUT_TOPIC = "alerts"
-
+OUTPUT_TOPIC = "alerts" 
+GROUP_ID = "processing_service_group"
 
 async def main():
-    consumer = await create_consumer()
-
-    producer = AIOKafkaProducer(
-        bootstrap_servers=KAFKA_BROKER,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8")
-    )
-
-    redis = await aioredis.from_url(
-        "redis://redis:6379",
-        encoding="utf-8",
-        decode_responses=True
-    )
-
+    consumer = Consumer(Topics.VEHICLE_DATA, GROUP_ID)
+    producer = Producer()
+    redis = RedisClient()
     state = VehicleState(redis)
 
+
+    await consumer.start()
     await producer.start()
 
     try:
-        async for msg in consumer:
-            raw = json.loads(msg.value)
+        async for msg in consumer.listen():
+
+            processed = run_pipeline(msg.value)  # type: ignore
 
             
-            processed = run_pipeline(raw)
-
-            
-            await state.update(processed.vehicle_id, processed.dict())
+            await state.update(processed.vehicle_id, processed.model_dump())
 
 
             if processed.risk_level in ["HIGH", "CRITICAL"]:
@@ -57,9 +49,9 @@ async def main():
                     recipient_name=processed.owner_name
                 )
 
-                await producer.send_and_wait(
+                await producer.send(
                     OUTPUT_TOPIC,
-                    alert.dict()
+                    alert.model_dump()
                 )
 
     finally:
