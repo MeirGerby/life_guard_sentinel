@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 from shared import (
     VehicleTelemetry, 
@@ -10,13 +9,10 @@ from shared import (
     Topics
 )
 
-from app.weather import get_external_temperature, is_heatwave
-from app.traffic import get_traffic_level
-from app.geofencing import is_danger_zone
+from .app import get_external_temperature, is_heatwave, get_traffic_level, is_danger_zone
 
 
-INPUT_TOPIC = "vehicle-data"
-OUTPUT_TOPIC = "telemetry.enriched"
+
 GROUP_ID = "enrichment-group"
 
 
@@ -24,9 +20,9 @@ def calculate_risk(data: dict) -> (int, RiskLevel, str):
     score = 0
 
     # temperature inside vehicle
-    if data["temperature"] > 40:
+    if data["internal_temp"] > 40:
         score += 40
-    elif data["temperature"] > 35:
+    elif data["internal_temp"] > 35:
         score += 25
 
     # external heat
@@ -69,7 +65,7 @@ async def main():
     try:
         async for msg in consumer.listen():
 
-            vehicle = VehicleTelemetry(**msg.value)    # type: ignore
+            vehicle = VehicleTelemetry(**msg)    # type: ignore
 
             
             ext_temp = get_external_temperature(vehicle.location.lat, vehicle.location.lon)

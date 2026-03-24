@@ -36,41 +36,41 @@ services:
       - ./infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
 
-  simulator:
-    build: ./services/simulator_service
-    container_name: simulator
-    depends_on:
-      - kafka
-    environment:
-      - KAFKA_BROKER=kafka:9092 
+  # simulator:
+  #   build: ./services/simulator_service
+  #   container_name: simulator
+  #   depends_on:
+  #     - kafka
+  #   environment:
+  #     - KAFKA_BROKER=kafka:9092 
 
-  processing:
-    build: ./services/processing_service
-    container_name: processing
-    depends_on:
-      - kafka
-      - redis
-    environment:
-      - KAFKA_BROKER=kafka:9092
-      - REDIS_HOST=redis
+  # processing:
+  #   build: ./services/processing_service
+  #   container_name: processing
+  #   depends_on:
+  #     - kafka
+  #     - redis
+  #   environment:
+  #     - KAFKA_BROKER=kafka:9092
+  #     - REDIS_HOST=redis
 
-  alert:
-    build: ./services/alert_service
-    container_name: alert
-    depends_on:
-      - kafka
-    environment:
-      - KAFKA_BROKER=kafka:9092
+  # alert:
+  #   build: ./services/alert_service
+  #   container_name: alert
+  #   depends_on:
+  #     - kafka
+  #   environment:
+  #     - KAFKA_BROKER=kafka:9092
 
-  api:
-    build: ./services/api_service
-    container_name: api
-    ports:
-      - "8000:8000"
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
+  # api:
+  #   build: ./services/api_service
+  #   container_name: api
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - redis
+  #   environment:
+  #     - REDIS_HOST=redis
 
 
 volumes:
