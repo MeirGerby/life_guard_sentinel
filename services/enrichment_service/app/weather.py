@@ -1,5 +1,5 @@
 import requests
-import redis
+from shared.redis import client
 import os
 import json
 
