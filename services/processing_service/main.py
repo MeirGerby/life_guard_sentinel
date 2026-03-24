@@ -7,12 +7,12 @@ from shared import (
     Producer, 
     Topics, 
     AlertEvent, 
-    AlertAction
+    AlertAction,
+    get_logger
 )
 
+logger = get_logger(__name__)
 
-KAFKA_BROKER = "kafka:9092"
-OUTPUT_TOPIC = "alerts" 
 GROUP_ID = "processing_service_group"
 
 async def main():
@@ -24,20 +24,22 @@ async def main():
 
     await consumer.start()
     await producer.start()
+    logger.info("Processing Service started. Listening for enriched telemetry...")
 
     try:
         async for msg in consumer.listen():
 
-            processed = run_pipeline(msg.value)  # type: ignore
+            processed = run_pipeline(msg)  # type: ignore
 
             
-            await state.update(processed.vehicle_id, processed.model_dump())
+            await state.update(processed.vehicle_id, processed.model_dump(mode='json'))
 
 
             if processed.risk_level in ["HIGH", "CRITICAL"]:
+                logger.warning(f"CRITICAL RISK for {processed.vehicle_id}: {processed.risk_score}")
                 alert = AlertEvent(
                     vehicle_id=processed.vehicle_id,
-                    priority=processed.risk_level,
+                    priority=processed.risk_level.value,
                     message=processed.recommendation,
                     actions=[
                         AlertAction.SMS,
@@ -49,7 +51,7 @@ async def main():
                 )
 
                 await producer.send(
-                    OUTPUT_TOPIC,
+                    Topics.ALERTS,
                     alert.model_dump()
                 )
 

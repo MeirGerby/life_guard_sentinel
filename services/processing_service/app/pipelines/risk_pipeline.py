@@ -26,13 +26,17 @@ def run_pipeline(data: dict) -> ProcessedVehicleData:
     score += heat_risk(data)
     score += rule_risk(features)
     score += ml_risk(features)
-
     score = min(score, 100)
 
     level, recommendation = calculate_level(score)
+    
+    clean_data = data.copy()
+    clean_data.pop("risk_score", None)
+    clean_data.pop("risk_level", None)
+    clean_data.pop("recommendation", None)
 
     return ProcessedVehicleData(
-        **data,
+        **clean_data,
         risk_score=score,
         risk_level=level,
         recommendation=recommendation
