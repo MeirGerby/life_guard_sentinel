@@ -1,9 +1,11 @@
 from shared.models.enrichment import ProcessedVehicleData, RiskLevel
 
-from app.processors.feature_engineering import extract_features
-from app.processors.heat_engine import heat_risk
-from app.processors.rule_engine import rule_risk
-from app.processors.ml_engine import ml_risk
+from ..processors import (
+    extract_features, 
+    heat_risk, 
+    rule_risk, 
+    ml_risk
+)
 
 
 def calculate_level(score: int):
