@@ -4,5 +4,5 @@ from typing import Dict, Any
 
 class AlertStrategy(ABC):
     @abstractmethod
-    async def execute(self, vehicle_id: str, payload: Dict[str, Any]):
+    async def send(self, vehicle_id: str, payload: Dict[str, Any]):
         pass
