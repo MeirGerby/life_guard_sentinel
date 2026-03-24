@@ -1,0 +1,137 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* רקע כללי */
+.page {
+  height: 100vh;
+  background: linear-gradient(135deg, #eef7ff, #d9ecff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* קופסה מרכזית */
+.form-container {
+  width: 450px;
+  max-width: 90%;
+  padding: 50px 40px;
+
+  background: rgba(100, 180, 255, 0.4);
+  backdrop-filter: blur(14px);
+
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+
+  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.15);
+
+  animation: fadeIn 0.8s ease;
+}
+
+/* כותרת */
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #1e4e8c;
+  font-size: 28px;
+}
+
+/* הודעות */
+.error-box, .success-box {
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14px;
+  animation: fadeIn 0.4s ease;
+}
+
+.error-box {
+  background: #ffe5e5;
+  color: #d8000c;
+}
+
+.success-box {
+  background: #e6ffed;
+  color: #027a32;
+}
+
+/* לייבלים */
+.form-container label {
+  display: block;
+  margin-bottom: 6px;
+  color: #2c5282;
+  font-size: 15px;
+}
+
+/* אינפוטים */
+.form-container input,
+.form-container select {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 20px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+/* פוקוס */
+.form-container input:focus,
+.form-container select:focus {
+  outline: none;
+  border-color: #63b3ed;
+  box-shadow: 0 0 10px rgba(99, 179, 237, 0.4);
+  transform: scale(1.02);
+}
+
+/* כפתור */
+.form-container button {
+  width: 100%;
+  padding: 14px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #4facfe, #00c6ff);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.form-container button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 198, 255, 0.4);
+}
+
+/* רספונסיבי */
+@media (max-width: 500px) {
+  .form-container {
+    padding: 30px 20px;
+  }
+
+  .form-container h2 {
+    font-size: 22px;
+  }
+}
+
+/* אנימציה */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
