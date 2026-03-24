@@ -1,16 +1,23 @@
 import asyncio
 import json
 
-from shared import VehicleTelemetry, ProcessedVehicleData, RiskLevel, Consumer, Producer
+from shared import (
+    VehicleTelemetry, 
+    ProcessedVehicleData, 
+    RiskLevel, 
+    Consumer, 
+    Producer,
+    Topics
+)
 
 from app.weather import get_external_temperature, is_heatwave
 from app.traffic import get_traffic_level
 from app.geofencing import is_danger_zone
 
 
-KAFKA_BROKER = "kafka:9092"
 INPUT_TOPIC = "vehicle-data"
 OUTPUT_TOPIC = "telemetry.enriched"
+GROUP_ID = "enrichment-group"
 
 
 def calculate_risk(data: dict) -> (int, RiskLevel, str):
@@ -49,35 +56,29 @@ def calculate_risk(data: dict) -> (int, RiskLevel, str):
 
 
 async def main():
-    consumer = AIOKafkaConsumer(
-        INPUT_TOPIC,
-        bootstrap_servers=KAFKA_BROKER,
-        group_id="enrichment-group",
-        auto_offset_reset="earliest"
-    )
+    consumer = Consumer(
+        topic=Topics.VEHICLE_DATA,
+        group_id=GROUP_ID,
 
-    producer = AIOKafkaProducer(
-        bootstrap_servers=KAFKA_BROKER,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8")
     )
+    producer = Producer()
 
     await consumer.start()
     await producer.start()
 
     try:
-        async for msg in consumer:
-            raw = json.loads(msg.value)
+        async for msg in consumer.listen():
 
-            vehicle = VehicleTelemetry(**raw)
+            vehicle = VehicleTelemetry(**msg.value)    # type: ignore
 
-            # 🌡️ enrichment
-            ext_temp = get_external_temperature(vehicle.lat, vehicle.lon)
+            
+            ext_temp = get_external_temperature(vehicle.location.lat, vehicle.location.lon)
             heatwave = is_heatwave(ext_temp)
-            traffic = get_traffic_level(vehicle.lat, vehicle.lon)
-            danger = is_danger_zone(vehicle.lat, vehicle.lon)
+            traffic = get_traffic_level(vehicle.location.lat, vehicle.location.lon)
+            danger = is_danger_zone(vehicle.location.lat, vehicle.location.lon)
 
             enriched_dict = {
-                **vehicle.dict(),
+                **vehicle.model_dump(),
                 "external_temp": ext_temp,
                 "is_heatwave": heatwave,
                 "traffic": traffic,
@@ -97,9 +98,9 @@ async def main():
             )
 
             
-            await producer.send_and_wait(
-                OUTPUT_TOPIC,
-                processed.dict()
+            await producer.send(
+                Topics.ENRICHED_DATA,
+                processed.model_dump()
             )
 
     finally:
