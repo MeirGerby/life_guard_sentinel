@@ -1,20 +1,26 @@
 import asyncio 
+from datetime import datetime, date
 import json
 from aiokafka import AIOKafkaProducer 
+
 from shared.config.settings import settings
 from shared.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-
+def json_serial(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError(f"Type {type(obj)} not serializable")
 class Producer:
     def __init__(self):
         self.producer = AIOKafkaProducer(
             bootstrap_servers=settings.KAFKA_BROKER,
-            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            value_serializer=lambda v: json.dumps(v, default=json_serial).encode("utf-8"),
             retry_backoff_ms=100,
             request_timeout_ms=40000
         )
+        
 
     async def start(self):
         """Must be called before sending messages"""

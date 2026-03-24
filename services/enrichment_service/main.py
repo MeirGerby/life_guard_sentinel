@@ -96,7 +96,7 @@ async def main():
             
             await producer.send(
                 Topics.ENRICHED_DATA,
-                processed.model_dump()
+                processed.model_dump(mode="json")
             )
 
     finally:
