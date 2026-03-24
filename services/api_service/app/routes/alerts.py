@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.services.redis_service import RedisService
 
-router = APIRouter()
+router = APIRouter(prefix="/alerts")
 redis_service = RedisService()
 
 

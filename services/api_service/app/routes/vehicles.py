@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.services.redis_service import RedisService
 
-router = APIRouter()
+router = APIRouter(prefix='/vehicles')
 redis_service = RedisService()
 
 
