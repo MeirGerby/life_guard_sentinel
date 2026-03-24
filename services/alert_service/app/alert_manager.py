@@ -1,8 +1,7 @@
 from typing import Dict, Any
 
-from app.channels.sms import SMSChannel
-from app.channels.call import CallChannel
-from app.channels.push import PushChannel
+from .channels import SMSChannel, CallChannel, PushChannel
+
 
 
 class AlertManager:
