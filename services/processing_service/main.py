@@ -1,7 +1,6 @@
 import asyncio
     
-from app.pipelines.risk_pipeline import run_pipeline
-from app.state.vehicle_state import VehicleState
+from .app import run_pipeline, VehicleState
 from shared import (
     Consumer, 
     RedisClient, 
@@ -17,7 +16,7 @@ OUTPUT_TOPIC = "alerts"
 GROUP_ID = "processing_service_group"
 
 async def main():
-    consumer = Consumer(Topics.VEHICLE_DATA, GROUP_ID)
+    consumer = Consumer(Topics.ENRICHED_DATA, GROUP_ID)
     producer = Producer()
     redis = RedisClient()
     state = VehicleState(redis)
