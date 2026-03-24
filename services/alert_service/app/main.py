@@ -2,18 +2,19 @@ import asyncio
 import json
 from aiokafka import AIOKafkaConsumer
 
-from app.alert_manager import AlertManager
+from . import AlertManager
 
 
 KAFKA_BROKER = "kafka:9092"
 TOPIC = "alerts"
+GROUP_ID = "alert-service"
 
 
 async def main():
     consumer = AIOKafkaConsumer(
         TOPIC,
         bootstrap_servers=KAFKA_BROKER,
-        group_id="alert-service",
+        group_id=GROUP_ID,
         auto_offset_reset="earliest"
     )
 
