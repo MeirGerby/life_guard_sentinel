@@ -7,7 +7,8 @@ class RedisClient:
         self.client = Redis(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
-            decode_responses=True
+            decode_responses=True,
+            max_connections=100
         )
 
     async def set(self, key: str, value: str):

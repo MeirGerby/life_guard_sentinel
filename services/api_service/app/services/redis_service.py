@@ -1,5 +1,6 @@
 import json
 from typing import Optional, Dict, Any
+import asyncio
 
 from shared import RedisClient
 
@@ -18,18 +19,21 @@ class RedisService:
         except Exception:
             return {"raw": data}
 
-    async def get_all_vehicles(self):
+    async def get_all_vehicles_fast(self):
         keys = await self.client.client.keys("vehicle:*")
+        if not keys:
+            return []
+        
+        results = await self.client.client.mget(keys=keys)
+        
         vehicles = []
-
-        for key in keys:
-            data = self.client.get(key)
+        for data in results:
             if data:
                 try:
-                    vehicles.append(json.loads(data.replace("'", '"')))
+                    str_data = data.decode('utf-8') if isinstance(data, bytes) else str(data)
+                    vehicles.append(json.loads(str_data.replace("'", '"')))
                 except Exception:
                     vehicles.append({"raw": data})
-
         return vehicles
 
     async def get_alerts(self):
@@ -37,7 +41,7 @@ class RedisService:
         alerts = []
 
         for key in keys:
-            data = self.client.get(key)
+            data = await self.client.get(key)
             if data:
                 try:
                     alerts.append(json.loads(data.replace("'", '"')))
@@ -45,3 +49,4 @@ class RedisService:
                     alerts.append({"raw": data})
 
         return alerts
+    
