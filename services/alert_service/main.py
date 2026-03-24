@@ -1,5 +1,4 @@
 import asyncio
-import json
 from shared import Consumer, Topics
 
 from .app import AlertManager
