@@ -1,15 +1,15 @@
 import json
 from typing import Optional, Dict, Any
 
-from shared.redis.client import RedisClient
+from shared import RedisClient
 
 
 class RedisService:
     def __init__(self):
         self.client = RedisClient()
 
-    def get_vehicle(self, vehicle_id: int) -> Optional[Dict[str, Any]]:
-        data = self.client.get(f"vehicle:{vehicle_id}")
+    async def get_vehicle(self, vehicle_id: int) -> Optional[Dict[str, Any]]:
+        data = await self.client.get(f"vehicle:{vehicle_id}")
         if not data:
             return None
 
@@ -18,8 +18,8 @@ class RedisService:
         except Exception:
             return {"raw": data}
 
-    def get_all_vehicles(self):
-        keys = self.client.client.keys("vehicle:*")
+    async def get_all_vehicles(self):
+        keys = await self.client.client.keys("vehicle:*")
         vehicles = []
 
         for key in keys:
@@ -32,8 +32,8 @@ class RedisService:
 
         return vehicles
 
-    def get_alerts(self):
-        keys = self.client.client.keys("alert:*")
+    async def get_alerts(self):
+        keys = await self.client.client.keys("alert:*")
         alerts = []
 
         for key in keys:
