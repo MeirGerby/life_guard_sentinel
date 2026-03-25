@@ -1,45 +1,36 @@
 import { useState, useEffect } from 'react';
+import { getOnlineUsers } from '../services/api';
 
-export default function useOnlineUsersHistory(userId) {
-  const STORAGE_KEY = `childguard_users_history_${userId || 'guest'}`;
-
-  const [history, setHistory] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+export default function useOnlineUsers(currentUserId, isBusy) {
+  const [users, setUsers]   = useState([]);
+  const [error, setError]   = useState(null);
 
   useEffect(() => {
-    if (!userId) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 500)));
-    } catch {}
-  }, [history, userId]);
+    const fetchUsers = async () => {
+      try {
+        setError(null);
+        const res = await getOnlineUsers();
+        const rawUsers = res.data?.users || res.data || [];
+        setUsers(rawUsers);
+      } catch (err) {
+        setError('לא ניתן לטעון משתמשים');
+        console.error('Failed to fetch online users:', err);
+      }
+    };
 
+    fetchUsers();
+    const interval = setInterval(fetchUsers, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // עדכן סטטוס עסוק של המשתמש הנוכחי
   useEffect(() => {
-    if (!userId) return;
-    try {
-      const key = `childguard_users_history_${userId}`;
-      const saved = localStorage.getItem(key);
-      if (saved) setHistory(JSON.parse(saved));
-    } catch {}
-  }, [userId]);
+    if (!currentUserId) return;
+    setUsers(prev => prev.map(u => ({
+      ...u,
+      busy: u.id === currentUserId ? isBusy : u.busy,
+    })));
+  }, [currentUserId, isBusy]);
 
-  const recordUserStatus = (users) => {
-    const now = new Date().toLocaleTimeString('he-IL');
-    const date = new Date().toLocaleDateString('he-IL');
-    setHistory(prev => [{
-      time: now, date,
-      users: users.map(u => ({
-        id: u.id, name: u.name,
-        role: u.role, station: u.station,
-        busy: u.busy,
-      })),
-    }, ...prev].slice(0, 500));
-  };
-
-  return { history, recordUserStatus };
+  return { users, count: users.length, error };
 }

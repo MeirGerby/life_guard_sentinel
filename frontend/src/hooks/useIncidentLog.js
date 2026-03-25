@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getIncidentLog, postIncidentLog } from '../services/api';
 
 export default function useIncidentLog(userId) {
   const STORAGE_KEY = `childguard_log_${userId || 'guest'}`;
@@ -7,28 +8,24 @@ export default function useIncidentLog(userId) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    } catch { return []; }
   });
 
-  // שמור לפי משתמש כשמשתנה
+  // טען היסטוריה מהבאקאנד
   useEffect(() => {
-    if (!userId) return;
-    try {
-      // שמור רק 200 הרשומות האחרונות
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(log.slice(0, 200)));
-    } catch {}
-  }, [log, userId]);
-
-  // טען מחדש כשמשתמש משתנה
-  useEffect(() => {
-    if (!userId) return;
-    try {
-      const key = `childguard_log_${userId}`;
-      const saved = localStorage.getItem(key);
-      if (saved) setLog(JSON.parse(saved));
-    } catch {}
+    const fetchLog = async () => {
+      try {
+        const res = await getIncidentLog();
+        const rawLog = res.data?.log || res.data || [];
+        if (rawLog.length > 0) {
+          setLog(rawLog);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(rawLog.slice(0, 200)));
+        }
+      } catch {
+        // fallback — localStorage
+      }
+    };
+    fetchLog();
   }, [userId]);
 
   const addLog = (entry) => {
@@ -39,12 +36,16 @@ export default function useIncidentLog(userId) {
       ...entry,
     };
 
-    setLog(prev => [logEntry, ...prev].slice(0, 200));
+    setLog(prev => {
+      const next = [logEntry, ...prev].slice(0, 200);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
 
-    fetch('http://localhost:8000/incidents/log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ timestamp: new Date().toISOString(), ...entry }),
+    // שלח לבאקאנד
+    postIncidentLog({
+      timestamp: new Date().toISOString(),
+      ...entry,
     }).catch(() => {});
   };
 

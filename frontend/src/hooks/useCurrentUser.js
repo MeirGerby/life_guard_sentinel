@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getMe } from '../services/api';
 
 export default function useCurrentUser() {
   const [user, setUser] = useState(null);
@@ -7,44 +8,30 @@ export default function useCurrentUser() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // קודם נסה מה-localStorage
+        // קודם נסה מה-localStorage (מה שהלוגין שמר)
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
           setUser(JSON.parse(savedUser));
           setLoading(false);
-          return;
         }
 
-        // אם אין — נסה מהבאקאנד
+        // עדכן מהבאקאנד
         const token = localStorage.getItem('token');
-        if (token) {
-          const res = await fetch('http://localhost:8000/auth/me', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setUser(data);
-            localStorage.setItem('user', JSON.stringify(data));
-            return;
+        if (token && token !== 'dev-token-123' && token !== 'dev-mode') {
+          const res = await getMe();
+          if (res.data) {
+            setUser(res.data);
+            localStorage.setItem('user', JSON.stringify(res.data));
           }
         }
-
-        // fallback — mock user לפיתוח
-        setUser({
-          id: 'u-001',
-          name: 'יוסי כהן',
-          role: 'מפקד',
-          station: 'תחנה 3 — ירושלים',
-          avatar: 'יכ',
-        });
       } catch {
-        setUser({
-          id: 'u-001',
-          name: 'יוסי כהן',
-          role: 'מפקד',
-          station: 'תחנה 3 — ירושלים',
-          avatar: 'יכ',
-        });
+        // רק מה-localStorage — בלי mock!
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        } else {
+          setUser(null); // אין משתמש — לא מציג כלום
+        }
       } finally {
         setLoading(false);
       }
