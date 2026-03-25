@@ -2,7 +2,7 @@ import json
 from typing import Optional, Dict, Any
 import asyncio
 
-from shared import RedisClient
+from backend.shared import RedisClient
 
 
 class RedisService:

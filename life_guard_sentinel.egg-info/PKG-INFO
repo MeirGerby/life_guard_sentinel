@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: life-guard-sentinel
+Version: 1.0.0
+Summary: Real-time IoT Monitoring System
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: sqlalchemy
+Requires-Dist: redis
+Requires-Dist: passlib[bcrypt]
+Requires-Dist: python-jose[cryptography]
+Requires-Dist: python-multipart
+Requires-Dist: pydantic[email]

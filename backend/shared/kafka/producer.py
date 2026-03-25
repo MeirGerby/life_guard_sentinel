@@ -3,8 +3,8 @@ from datetime import datetime, date
 import json
 from aiokafka import AIOKafkaProducer 
 
-from shared.config.settings import settings
-from shared.utils.logger import get_logger
+from backend.shared.config.settings import settings
+from backend.shared.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

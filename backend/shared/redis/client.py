@@ -1,5 +1,5 @@
 from redis.asyncio import Redis 
-from shared.config.settings import settings
+from backend.shared.config.settings import settings
 
 
 class RedisClient:

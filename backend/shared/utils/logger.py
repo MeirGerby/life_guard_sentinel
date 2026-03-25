@@ -1,5 +1,5 @@
 import logging
-from shared.config.settings import settings
+from backend.shared.config.settings import settings
 
 
 def get_logger(name: str):
