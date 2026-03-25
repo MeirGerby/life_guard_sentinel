@@ -27,7 +27,7 @@ function Login() {
             setError(""); // Reset error
 
             const res = await axios.post(
-                "http://127.0.0.1:8000/login",
+                "http://127.0.0.1:8000/auth/login",
                 { name, password },
                 { withCredentials: true } // 🍪 אם בעתיד נשתמש ב-Cookies
             );
