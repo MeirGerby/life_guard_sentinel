@@ -1,14 +1,5 @@
 import { useState, useEffect } from 'react';
 
-// Mock user — יוחלף בנתונים אמיתיים מהלוגין
-const MOCK_USER = {
-  id: 'u-001',
-  name: 'יוסי כהן',
-  role: 'מפקד',
-  station: 'תחנה 3 — ירושלים',
-  avatar: 'יכ',
-};
-
 export default function useCurrentUser() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,11 +7,16 @@ export default function useCurrentUser() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // ננסה לקבל token מה-localStorage (כפי שחבר הצוות שמר)
-        const token = localStorage.getItem('token') ||
-                      localStorage.getItem('access_token') ||
-                      localStorage.getItem('authToken');
+        // קודם נסה מה-localStorage
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+          setLoading(false);
+          return;
+        }
 
+        // אם אין — נסה מהבאקאנד
+        const token = localStorage.getItem('token');
         if (token) {
           const res = await fetch('http://localhost:8000/auth/me', {
             headers: { Authorization: `Bearer ${token}` }
@@ -28,13 +24,27 @@ export default function useCurrentUser() {
           if (res.ok) {
             const data = await res.json();
             setUser(data);
+            localStorage.setItem('user', JSON.stringify(data));
             return;
           }
         }
-        // fallback — mock user
-        setUser(MOCK_USER);
+
+        // fallback — mock user לפיתוח
+        setUser({
+          id: 'u-001',
+          name: 'יוסי כהן',
+          role: 'מפקד',
+          station: 'תחנה 3 — ירושלים',
+          avatar: 'יכ',
+        });
       } catch {
-        setUser(MOCK_USER);
+        setUser({
+          id: 'u-001',
+          name: 'יוסי כהן',
+          role: 'מפקד',
+          station: 'תחנה 3 — ירושלים',
+          avatar: 'יכ',
+        });
       } finally {
         setLoading(false);
       }
