@@ -1,17 +1,34 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import './index.css';
+
+// בדיקה אם המשתמש מחובר
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem('token') ||
+                localStorage.getItem('access_token') ||
+                localStorage.getItem('authToken');
+  
+  if (!token) {
+    // לא מחובר — חזור לדף הלוגין של חבר הצוות
+    window.location.href = 'http://localhost:3001'; // כתובת דף הלוגין
+    return null;
+  }
+  
+  return children;
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={
+        <PrivateRoute>
+          <App />
+        </PrivateRoute>
+      } />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  </BrowserRouter>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

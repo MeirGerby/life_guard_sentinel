@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -51,62 +51,66 @@ function createIcon(risk, animate) {
   });
 }
 
+function createHistoryDot(color) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: ${color};
+      opacity: 0.6;
+      border: 1px solid white;
+    "></div>`,
+  });
+}
+
 function FitBounds({ vehicles, autoCenter }) {
   const map = useMap();
   const fitted = useRef(false);
-
   useEffect(() => {
-    if (!autoCenter) return;
-    if (fitted.current || vehicles.length === 0) return;
+    if (!autoCenter || fitted.current || vehicles.length === 0) return;
     const bounds = vehicles.map(v => [v.lat, v.lng]);
     map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15 });
     fitted.current = true;
   }, [vehicles, map, autoCenter]);
-
   return null;
 }
 
 function ZoomController({ defaultZoom }) {
   const map = useMap();
   const prevZoom = useRef(defaultZoom);
-
   useEffect(() => {
     if (prevZoom.current !== defaultZoom) {
       map.setZoom(defaultZoom);
       prevZoom.current = defaultZoom;
     }
   }, [defaultZoom, map]);
-
   return null;
 }
 
 function TileLayerController({ mapStyle }) {
   const map = useMap();
   const prevStyle = useRef(mapStyle);
-
   useEffect(() => {
     if (prevStyle.current !== mapStyle) {
       prevStyle.current = mapStyle;
       map.eachLayer(layer => {
-        if (layer instanceof L.TileLayer) {
-          map.removeLayer(layer);
-        }
+        if (layer instanceof L.TileLayer) map.removeLayer(layer);
       });
       L.tileLayer(MAP_TILES[mapStyle] || MAP_TILES.street, {
         attribution: MAP_ATTRIBUTIONS[mapStyle] || '© OpenStreetMap'
       }).addTo(map);
     }
   }, [mapStyle, map]);
-
   return null;
 }
 
-export default function MapView({ vehicles, onSelectVehicle, height, settings }) {
-  const mapStyle      = settings?.mapStyle      || 'street';
-  const showMarkers   = settings?.showMarkers   !== false;
+export default function MapView({ vehicles, onSelectVehicle, height, settings, selectedVehicle }) {
+  const mapStyle       = settings?.mapStyle       || 'street';
+  const showMarkers    = settings?.showMarkers    !== false;
   const animateMarkers = settings?.animateMarkers !== false;
-  const autoCenter    = settings?.autoCenter    !== false;
-  const defaultZoom   = settings?.defaultZoom   || 14;
+  const autoCenter     = settings?.autoCenter     !== false;
+  const defaultZoom    = settings?.defaultZoom    || 14;
 
   return (
     <MapContainer
@@ -122,6 +126,29 @@ export default function MapView({ vehicles, onSelectVehicle, height, settings })
       <ZoomController defaultZoom={defaultZoom} />
       <TileLayerController mapStyle={mapStyle} />
 
+      {/* היסטוריית מסלול לרכב הנבחר */}
+      {selectedVehicle && selectedVehicle.history && selectedVehicle.history.length > 1 && (
+        <>
+          {/* קו המסלול */}
+          <Polyline
+            positions={selectedVehicle.history}
+            color={riskColors[selectedVehicle.risk] || '#3b82f6'}
+            weight={3}
+            opacity={0.7}
+            dashArray="6 4"
+          />
+          {/* נקודות היסטוריה */}
+          {selectedVehicle.history.slice(0, -1).map((pos, i) => (
+            <Marker
+              key={`history-${i}`}
+              position={pos}
+              icon={createHistoryDot(riskColors[selectedVehicle.risk] || '#3b82f6')}
+            />
+          ))}
+        </>
+      )}
+
+      {/* מרקרים של רכבים */}
       {showMarkers && vehicles.map(v => (
         <Marker
           key={v.id}
