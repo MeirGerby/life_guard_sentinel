@@ -35,17 +35,28 @@ async def main():
             await state.update(processed.vehicle_id, processed.model_dump(mode='json'))
 
 
-            if processed.risk_level in ["HIGH", "CRITICAL"]:
-                logger.warning(f"CRITICAL RISK for {processed.vehicle_id}: {processed.risk_score}")
+            if processed.risk_level in ["MEDIUM", "HIGH", "CRITICAL"]:
+                actions = []
+                message_prefix = ""
+
+                if processed.risk_level == "MEDIUM":
+                    actions = [AlertAction.SMS]
+                    message_prefix = "[SMS NOTICE]"
+                
+                elif processed.risk_level == "HIGH":
+                    actions = [AlertAction.SMS, AlertAction.PUSH] 
+                    message_prefix = "[VEHICLE ACTION REQUIRED]"
+                
+                elif processed.risk_level == "CRITICAL":
+                    actions = [AlertAction.SMS, AlertAction.PUSH, AlertAction.CALL]
+                    message_prefix = "[EMERGENCY - DISPATCHING SERVICES]"
+
+                logger.warning(f"{processed.risk_level} RISK for {processed.vehicle_id}: {processed.risk_score}")
                 alert = AlertEvent(
                     vehicle_id=processed.vehicle_id,
-                    priority=processed.risk_level.value,
-                    message=processed.recommendation,
-                    actions=[
-                        AlertAction.SMS,
-                        AlertAction.PUSH,
-                        AlertAction.CALL
-                    ],
+                    priority=processed.risk_level, 
+                    message=f"{message_prefix} {processed.recommendation}",
+                    actions=actions,
                     recipient_phone=processed.owner_phone,
                     recipient_name=processed.owner_name
                 )
@@ -58,7 +69,7 @@ async def main():
     finally:
         await consumer.stop()
         await producer.stop()
-        await redis.close()
+        await redis.client.close()
 
 
 if __name__ == "__main__":
