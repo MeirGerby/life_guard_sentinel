@@ -2,13 +2,13 @@ import sys
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import asyncio
-from .routes import vehicles, alerts, auth
-from .services.redis_service import RedisService 
-from .db.database import engine, Base
+from .app.routes import vehicles, alerts, auth
+from .app.services.redis_service import RedisService 
+from .app.db.database import engine, Base
 
-from .db.database import SessionLocal
-from .db.models import User
-from .core.security import get_password_hash
+from .app.db.database import SessionLocal
+from .app.db.models import User
+from .app.core.security import get_password_hash
 
 def create_first_admin():
     db = SessionLocal()
@@ -39,8 +39,8 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown: This is where we fix your error
     # We force the Redis connections to close BEFORE the loop dies
-    from .routes.vehicles import redis_service as vehicle_redis
-    from .routes.alerts import redis_service as alert_redis
+    from .app.routes.vehicles import redis_service as vehicle_redis
+    from .app.routes.alerts import redis_service as alert_redis
     
     # Close both connections before the event loop is destroyed
     await asyncio.gather(

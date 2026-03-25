@@ -3,6 +3,7 @@ pyproject.toml
 backend/__init__.py
 backend/scripts/create_topics.py
 backend/scripts/seed_data.py
+backend/services/__init__.py
 backend/services/alert_service/main.py
 backend/services/alert_service/app/__init__.py
 backend/services/alert_service/app/alert_manager.py
@@ -11,8 +12,9 @@ backend/services/alert_service/app/channels/base.py
 backend/services/alert_service/app/channels/call.py
 backend/services/alert_service/app/channels/push.py
 backend/services/alert_service/app/channels/sms.py
+backend/services/api_service/__init__.py
+backend/services/api_service/main.py
 backend/services/api_service/app/__init__.py
-backend/services/api_service/app/main.py
 backend/services/api_service/app/core/config.py
 backend/services/api_service/app/core/security.py
 backend/services/api_service/app/db/database.py
