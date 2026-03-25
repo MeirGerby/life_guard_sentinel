@@ -4,7 +4,7 @@ from typing import Literal
 
 class GPSLocation(BaseModel):
     lat: float
-    lon: float
+    lon: float = Field(validation_alias="lng")
 
 class VehicleTelemetry(BaseModel):
     vehicle_id: str

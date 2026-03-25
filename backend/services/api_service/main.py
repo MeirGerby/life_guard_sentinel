@@ -1,7 +1,9 @@
 import sys  
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
+from datetime import datetime   
 from .app.routes import vehicles, alerts, auth
 from .app.services.redis_service import RedisService 
 from .app.db.database import engine, Base
@@ -48,6 +50,15 @@ async def lifespan(app: FastAPI):
         alert_redis.client.client.aclose(),
         return_exceptions=True
     )
+    
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+    "http://localhost:5173",  
+    "http://127.0.0.1:5173",
+]
 
 app = FastAPI(
     title="Life Guard Sentinel API",
@@ -56,6 +67,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,         
+    allow_credentials=True,
+    allow_methods=["*"],              
+    allow_headers=["*"],           
+)
 
 # Register routes
 app.include_router(auth.router)
@@ -70,4 +88,4 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "healthy", "timestamp": datetime.now()}

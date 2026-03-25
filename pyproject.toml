@@ -14,7 +14,9 @@ dependencies = [
     "passlib[bcrypt]",
     "python-jose[cryptography]",
     "python-multipart",
-    "pydantic[email]"
+    "pydantic[email]",
+    "pydantic_settings",
+    "aiokafka"
 ]
 
 [tool.setuptools.packages.find]
