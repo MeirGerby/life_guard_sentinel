@@ -4,15 +4,13 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css"; // ✅ חשוב לייבא את ה-CSS
 
 function Login() {
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
-    // 🧠 State
     const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [token, setToken] = useState(null); // 🔐 memory storage
 
-    // 👇 Update handlers
     function updateName(e) {
         setName(e.target.value);
     }
@@ -21,7 +19,6 @@ function Login() {
         setPassword(e.target.value);
     }
 
-    // Send login request
     async function sendUserInput() {
         try {
             setError(""); // Reset error
@@ -34,20 +31,15 @@ function Login() {
 
             const data = res.data;
 
-            // אם המשתמש לא קיים / שגיאה
             if (data.error) {
                 setError("User doesn't exist");
                 return;
             }
 
-            // ✅ שמירת token
-            setToken(data.token); // Memory
-            localStorage.setItem("token", data.token); // Fallback
+            setToken(data.token);
+            localStorage.setItem("token", data.token);
 
-            // ניווט לפי תפקיד (אם תרצה להפעיל navigate)
-            if (data.user.role === "Admin") {
-                navigate("/admin_dashboard");
-            }
+            navigate('http://localhost:3000');
 
         } catch (err) {
             console.log("Login error:", err.response?.data || err.message);
@@ -76,7 +68,6 @@ function Login() {
                     placeholder="Enter your password"
                 />
 
-                {/* ❌ Error Box */}
                 {error && <div className="error-box">{error}</div>}
 
                 <button onClick={sendUserInput}>Submit</button>
