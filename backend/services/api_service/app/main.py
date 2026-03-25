@@ -6,7 +6,28 @@ from .routes import vehicles, alerts, auth
 from .services.redis_service import RedisService 
 from .db.database import engine, Base
 
+from .db.database import SessionLocal
+from .db.models import User
+from .core.security import get_password_hash
+
+def create_first_admin():
+    db = SessionLocal()
+    admin_exists = db.query(User).filter(User.role == "admin").first()
+    if not admin_exists:
+        hashed_password = get_password_hash("admin1234") # סיסמה ראשונית
+        admin = User(
+            username="admin",
+            email="admin@sentinel.com",
+            hashed_password=hashed_password,
+            role="admin"
+        )
+        db.add(admin)
+        db.commit()
+        print("First Admin created: user: admin, pass: admin1234")
+    db.close()
+
 Base.metadata.create_all(bind=engine)
+create_first_admin()
 
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy()) 
@@ -28,20 +49,18 @@ async def lifespan(app: FastAPI):
         return_exceptions=True
     )
 
-app = FastAPI(lifespan=lifespan)
-
-app.include_router(auth.router)
-app.include_router(vehicles.router)
-app.include_router(alerts.router)
 app = FastAPI(
     title="Life Guard Sentinel API",
     version="1.0.0",
-    debug=True
+    debug=True,
+    lifespan=lifespan
 )
 
+
 # Register routes
-app.include_router(vehicles.router, prefix="/vehicles", tags=["Vehicles"])
-app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
+app.include_router(auth.router)
+app.include_router(vehicles.router, tags=["Vehicles"])
+app.include_router(alerts.router, tags=["Alerts"])
 
 
 @app.get("/")

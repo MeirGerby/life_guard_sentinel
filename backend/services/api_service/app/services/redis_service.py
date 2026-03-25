@@ -9,7 +9,7 @@ class RedisService:
     def __init__(self):
         self.client = RedisClient()
 
-    async def get_vehicle(self, vehicle_id: int) -> Optional[Dict[str, Any]]:
+    async def get_vehicle(self, vehicle_id: str) -> Optional[Dict[str, Any]]:
         data = await self.client.get(f"vehicle:{vehicle_id}")
         if not data:
             return None
