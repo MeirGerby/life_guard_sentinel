@@ -11,9 +11,8 @@ function PrivateRoute({ children }) {
                 localStorage.getItem('authToken');
   
   if (!token) {
-    // לא מחובר — חזור לדף הלוגין של חבר הצוות
-    window.location.href = 'http://localhost:3001'; // כתובת דף הלוגין
-    return null;
+    console.warn("No token found, but staying on current page for development.");
+    return children;
   }
   
   return children;

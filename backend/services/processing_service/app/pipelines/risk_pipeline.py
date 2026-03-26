@@ -1,4 +1,4 @@
-from shared.models.enrichment import ProcessedVehicleData, RiskLevel
+from backend.shared.models.enrichment import ProcessedVehicleData, RiskLevel
 
 from ..processors import (
     extract_features, 

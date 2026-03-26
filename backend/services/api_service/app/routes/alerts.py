@@ -11,7 +11,7 @@ async def get_alerts():
     return {"alerts": await redis_service.get_alerts()}  
 
 
-@router.post("/alerts/notify")
+@router.post("/notify")
 async def notify_owner(payload: dict):
     vehicle_id = payload.get("vehicle_id")
     phone = payload.get("phone")

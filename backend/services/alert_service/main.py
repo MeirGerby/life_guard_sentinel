@@ -1,5 +1,5 @@
 import asyncio
-from shared import Consumer, Topics
+from backend.shared import Consumer, Topics
 
 from .app import AlertManager
 

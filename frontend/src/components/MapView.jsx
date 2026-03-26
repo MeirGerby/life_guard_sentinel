@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -105,6 +106,7 @@ function TileLayerController({ mapStyle }) {
   return null;
 }
 
+
 export default function MapView({ vehicles, onSelectVehicle, height, settings, selectedVehicle }) {
   const mapStyle       = settings?.mapStyle       || 'street';
   const showMarkers    = settings?.showMarkers    !== false;
@@ -117,52 +119,65 @@ export default function MapView({ vehicles, onSelectVehicle, height, settings, s
       center={[31.785, 35.218]}
       zoom={defaultZoom}
       style={{ height: height || '100%', width: '100%' }}
+      preferCanvas={true} // אופטימיזציה חשובה לרינדור של הרבה אלמנטים
     >
       <TileLayer
         url={MAP_TILES[mapStyle] || MAP_TILES.street}
         attribution={MAP_ATTRIBUTIONS[mapStyle] || '© OpenStreetMap'}
       />
+      
       <FitBounds vehicles={vehicles} autoCenter={autoCenter} />
       <ZoomController defaultZoom={defaultZoom} />
       <TileLayerController mapStyle={mapStyle} />
 
-      {/* היסטוריית מסלול לרכב הנבחר */}
+      {/* 1. הקלאסטר הראשי - כל הרכבים חייבים להיות בתוכו! */}
+      {showMarkers && (
+        <MarkerClusterGroup
+          chunkedLoading // טעינה במנות כדי לא לתקוע את ה-UI
+          maxClusterRadius={50} // רדיוס איחוד המרקרים
+        >
+          {vehicles.map(v => {
+            // וידוא קואורדינטות - אם ב-JSON זה v.location.lat, נשתמש בזה
+            const position = v.location ? [v.location.lat, v.location.lon] : [v.lat, v.lng];
+            
+            return (
+              <Marker
+                key={v.vehicle_id || v.id}
+                position={position}
+                icon={createIcon(v.risk_level?.toLowerCase() || 'ok', animateMarkers)}
+                eventHandlers={{ click: () => onSelectVehicle(v) }}
+              >
+                <Popup>
+                  <strong>{v.vehicle_id}</strong><br />
+                  Driver: {v.owner_name}<br />
+                  Temp: {v.internal_temp}°C
+                </Popup>
+              </Marker>
+            );
+          })}
+        </MarkerClusterGroup>
+      )}
+
+      {/* 2. היסטוריית מסלול לרכב הנבחר בלבד */}
       {selectedVehicle && selectedVehicle.history && selectedVehicle.history.length > 1 && (
         <>
-          {/* קו המסלול */}
           <Polyline
             positions={selectedVehicle.history}
-            color={riskColors[selectedVehicle.risk] || '#3b82f6'}
+            color={riskColors[selectedVehicle.risk_level?.toLowerCase()] || '#3b82f6'}
             weight={3}
             opacity={0.7}
             dashArray="6 4"
           />
-          {/* נקודות היסטוריה */}
+          {/* נקודות היסטוריה מצוירות כנקודות קטנות ופשוטות */}
           {selectedVehicle.history.slice(0, -1).map((pos, i) => (
             <Marker
               key={`history-${i}`}
               position={pos}
-              icon={createHistoryDot(riskColors[selectedVehicle.risk] || '#3b82f6')}
+              icon={createHistoryDot(riskColors[selectedVehicle.risk_level?.toLowerCase()] || '#3b82f6')}
             />
           ))}
         </>
       )}
-
-      {/* מרקרים של רכבים */}
-      {showMarkers && vehicles.map(v => (
-        <Marker
-          key={v.id}
-          position={[v.lat, v.lng]}
-          icon={createIcon(v.risk, animateMarkers)}
-          eventHandlers={{ click: () => onSelectVehicle(v) }}
-        >
-          <Popup>
-            <strong>{v.plate}</strong><br />
-            {v.model}<br />
-            טמפרטורה: {v.temp}°C
-          </Popup>
-        </Marker>
-      ))}
     </MapContainer>
   );
 }

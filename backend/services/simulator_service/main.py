@@ -1,6 +1,6 @@
 import asyncio
 from .app.simulator import VehicleSimulator
-from shared import Topics, get_logger, Producer
+from backend.shared import Topics, get_logger, Producer
 
 logger = get_logger(__name__)
 
@@ -9,7 +9,7 @@ async def run_simulator():
     producer = Producer()
     await producer.start()
     
-    simulator = VehicleSimulator(num_vehicles=10000)
+    simulator = VehicleSimulator(num_vehicles=500)
     
     logger.info("Starting simulation for 10000 vehicles...")
     

@@ -25,7 +25,7 @@ async def get_vehicle(vehicle_id: str):
     return vehicle 
 
 
-@router.post("/vehicles/{vehicle_id}/engine/start")
+@router.post("/{vehicle_id}/engine/start")
 async def start_engine(vehicle_id: str):
     # שליחת פקודה ל-Kafka כדי שהסימולטור/רכב יניע
     # await kafka_producer.send("vehicle_commands", {
@@ -34,7 +34,7 @@ async def start_engine(vehicle_id: str):
     # })
     return {"status": "success", "action": "engine_start_command_sent"} 
 
-@router.post("/vehicles/{vehicle_id}/engine/stop")
+@router.post("/{vehicle_id}/engine/stop")
 async def stop_engine(vehicle_id: str):
     # await kafka_producer.send("vehicle_commands", {
     #     "vehicle_id": vehicle_id, 

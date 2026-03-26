@@ -1,7 +1,7 @@
 import asyncio
     
 from .app import VehicleState ,run_pipeline
-from shared import (
+from backend.shared import (
     Consumer, 
     RedisClient, 
     Producer, 

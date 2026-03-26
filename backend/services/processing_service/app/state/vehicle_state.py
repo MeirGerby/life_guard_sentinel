@@ -1,5 +1,5 @@
 import json
-from shared import RedisClient
+from backend.shared import RedisClient
 
 
 class VehicleState:

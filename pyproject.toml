@@ -16,7 +16,10 @@ dependencies = [
     "python-multipart",
     "pydantic[email]",
     "pydantic_settings",
-    "aiokafka"
+    "aiokafka",
+    "numpy",
+    "joblib",
+    "scikit-learn"
 ]
 
 [tool.setuptools.packages.find]

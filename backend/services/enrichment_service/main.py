@@ -1,6 +1,6 @@
 import asyncio
 
-from shared import (
+from backend.shared import (
     VehicleTelemetry, 
     ProcessedVehicleData, 
     RiskLevel, 
@@ -68,10 +68,10 @@ async def main():
             vehicle = VehicleTelemetry(**msg)    # type: ignore
 
             
-            ext_temp = get_external_temperature(vehicle.location.lat, vehicle.location.lon)
+            ext_temp = get_external_temperature(vehicle.location.lat, vehicle.location.lng)
             heatwave = is_heatwave(ext_temp)
-            traffic = get_traffic_level(vehicle.location.lat, vehicle.location.lon)
-            danger = is_danger_zone(vehicle.location.lat, vehicle.location.lon)
+            traffic = get_traffic_level(vehicle.location.lat, vehicle.location.lng)
+            danger = is_danger_zone(vehicle.location.lat, vehicle.location.lng)
 
             enriched_dict = {
                 **vehicle.model_dump(),

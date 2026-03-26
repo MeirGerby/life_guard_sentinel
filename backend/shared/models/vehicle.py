@@ -1,10 +1,14 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import Literal 
 
 class GPSLocation(BaseModel):
     lat: float
-    lon: float = Field(validation_alias="lng")
+    lng: float = Field(..., alias="lon") 
+
+    model_config = ConfigDict(
+        populate_by_name=True
+    )
 
 class VehicleTelemetry(BaseModel):
     vehicle_id: str
