@@ -1,4 +1,4 @@
 class Topics:
-    VEHICLE_DATA = "vehicle-data"
-    ENRICHED_DATA = "enriched-data"
-    ALERTS = "alerts"
+    VEHICLE_DATA = "vehicle"
+    ENRICHED_DATA = "enriched"
+    ALERTS = "alert"
