@@ -4,17 +4,34 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-const token = localStorage.getItem('token') || 'dev-mode';
-
-if (!token) {
-  window.location.href = 'http://localhost:5173';
-} else {
-  const root = ReactDOM.createRoot(document.getElementById('root'));
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
+// בדיקה אם המשתמש מחובר
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem('token') ||
+                localStorage.getItem('access_token') ||
+                localStorage.getItem('authToken');
+  
+  // if (!token) {
+  //   // לא מחובר — חזור לדף הלוגין של חבר הצוות
+  //   window.location.href = 'http://localhost:3001'; // כתובת דף הלוגין
+  //   return null;
+  // }
+  if (!token) {
+    console.warn("No token found, but staying on current page for development.");
+    return children;
+  }
+  return children;
 }
 
-reportWebVitals();
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={
+        <PrivateRoute>
+          <App />
+        </PrivateRoute>
+      } />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  </BrowserRouter>
+);

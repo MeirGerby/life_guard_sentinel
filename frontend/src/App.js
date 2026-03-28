@@ -381,7 +381,7 @@ export default function App() {
       if (onlineUsers.length > 0) recordUserStatus(onlineUsers);
     }, 30000);
     return () => clearInterval(recordIntervalRef.current);
-  }, [vehicles, onlineUsers]);
+  }, [vehicles, onlineUsers, recordUserStatus, recordVehicleState]);
 
   useEffect(() => { setLastRefresh(Date.now()); setSystemOk(true); }, [vehicles]);
   useEffect(() => { const i = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(i); }, []);
@@ -405,8 +405,8 @@ export default function App() {
       });
     }
     prevCriticalCount.current = criticalCount;
-  }, [vehicles, settings.alertSound, settings.alertVolume]);
-
+  }, [vehicles, settings.alertSound, settings.alertVolume, addLog, onlineUsers, recordUserStatus, recordVehicleState, user?.name]);
+      
   // ✅ שמירת הגדרות לפי משתמש
   const handleSettingsChange = (key, value) => {
     const storageKey = `childguard_settings_${user?.id || 'guest'}`;
