@@ -19,7 +19,8 @@ dependencies = [
     "aiokafka",
     "numpy",
     "joblib",
-    "scikit-learn"
+    "scikit-learn",
+    "Faker"
 ]
 
 [tool.setuptools.packages.find]

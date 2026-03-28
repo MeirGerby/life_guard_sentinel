@@ -24,20 +24,24 @@ services:
 
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
 
-    volumes:
-      - kafka_kraft:/var/lib/kafka/data
+    # volumes:
+    #   - kafka_kraft:/var/lib/kafka/data
 
   redis:
     image: redis:7 
     container_name: redis
     ports:
       - "6379:6379" 
-    volumes:
-      - ./infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    # volumes:
+    #   - ./infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    # command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
 
   # simulator:
-  #   build: ./services/simulator_service
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: simulator-service
+    
   #   container_name: simulator
   #   depends_on:
   #     - kafka
@@ -45,7 +49,10 @@ services:
   #     - KAFKA_BROKER=kafka:9092 
 
   # processing:
-  #   build: ./services/processing_service
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: processing-service
   #   container_name: processing
   #   depends_on:
   #     - kafka
@@ -63,7 +70,10 @@ services:
   #     - KAFKA_BROKER=kafka:9092
 
   # api:
-  #   build: ./services/api_service
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: api-service
   #   container_name: api
   #   ports:
   #     - "8000:8000"
@@ -71,7 +81,13 @@ services:
   #     - redis
   #   environment:
   #     - REDIS_HOST=redis
+  # frontend:
+  #   build: ./frontend
+  #   container_name: sentinel_frontend
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - api
 
-
-volumes:
-  kafka_kraft:
+# volumes:
+#   kafka_kraft:

@@ -9,7 +9,7 @@ async def run_simulator():
     producer = Producer()
     await producer.start()
     
-    simulator = VehicleSimulator(num_vehicles=500)
+    simulator = VehicleSimulator(num_vehicles=100)
     
     logger.info("Starting simulation for 10000 vehicles...")
     

@@ -8,14 +8,14 @@ router = APIRouter(prefix='/vehicles')
 redis_service = RedisService()
 logger = get_logger(__name__)
 
-@router.get("/", response_model=List[ProcessedVehicleData])
 # async def get_all_vehicles(current_admin = Depends(get_current_admin)):
+@router.get("/", response_model=List[ProcessedVehicleData])
 async def get_all_vehicles():
     vehicles_data = await redis_service.get_all_vehicles_fast()
     return vehicles_data
 
-@router.get("/{vehicle_id}")
 # async def get_vehicle(vehicle_id: str, current_user = Depends(get_current_user)):
+@router.get("/{vehicle_id}")
 async def get_vehicle(vehicle_id: str):
     vehicle = await redis_service.get_vehicle(vehicle_id)
 
@@ -27,7 +27,6 @@ async def get_vehicle(vehicle_id: str):
 
 @router.post("/{vehicle_id}/engine/start")
 async def start_engine(vehicle_id: str):
-    # שליחת פקודה ל-Kafka כדי שהסימולטור/רכב יניע
     # await kafka_producer.send("vehicle_commands", {
     #     "vehicle_id": vehicle_id,
     #     "command": "START_ENGINE"
@@ -40,4 +39,6 @@ async def stop_engine(vehicle_id: str):
     #     "vehicle_id": vehicle_id, 
     #     "command": "STOP_ENGINE"
     # })
-    return {"status": "success", "action": "engine_stop_command_sent"}
+    return {"status": "success", "action": "engine_stop_command_sent"} 
+
+
